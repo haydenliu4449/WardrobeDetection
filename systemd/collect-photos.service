@@ -1,0 +1,9 @@
+[Unit]
+Description=Save a closet photo for the training set
+
+[Service]
+Type=oneshot
+User=__USER__
+WorkingDirectory=__DIR__
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 "__DIR__/capture.py" --collect

@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
 PHOTOS_DIR = DATA_DIR / "photos"
 CAPTURES_DIR = DATA_DIR / "captures"
+TRAINING_PHOTOS = DATA_DIR / "training_photos"
 WARDROBE_FILE = DATA_DIR / "wardrobe.json"
 STATE_FILE = DATA_DIR / "today.json"
 HISTORY_FILE = DATA_DIR / "history.json"
@@ -27,11 +28,19 @@ DEFAULTS = {
         "warmup_frames": 20,
         "light_pin": 0,
         "light_settle": 1.5,
+        "collect_min_change": 1.0,
     },
     "detect": {
+        "method": "api",
         "model": "claude-sonnet-5-5",
         "max_image_px": 1568,
         "timeout": 60,
+    },
+    "yolo": {
+        "model": "models/closet.onnx",
+        "present": 0.5,
+        "unsure": 0.25,
+        "api_fallback": True,
     },
     "outfits": {
         "count": 3,

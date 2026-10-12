@@ -1,4 +1,4 @@
-"""Today's forecast from Open-Meteo (free, no API key)."""
+"""Today's forecast from Open-Meteo"""
 
 import logging
 

@@ -12,10 +12,18 @@ height = 1080
 warmup_frames = 20          # frames thrown away while exposure settles
 light_pin = 0               # GPIO (BCM) pin for the closet LED strip, 0 = no light
 light_settle = 1.5          # seconds to wait after turning the light on
+collect_min_change = 1.0    # capture.py --collect only keeps a photo if this % of it changed
 
 [detect]
+method = "api"              # "api", or "yolo" once you've trained a model (training/README.md)
 model = "claude-sonnet-5-5"
 max_image_px = 1568         # photos are shrunk to this before upload
+
+[yolo]
+model = "models/closet.onnx"
+present = 0.5               # score needed to count an item as there
+unsure = 0.25               # between this and present = maybe, still gets suggested
+api_fallback = true         # ask the API about clothes the model wasn't trained on
 
 [outfits]
 count = 3

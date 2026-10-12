@@ -1,0 +1,4 @@
+# For training on a PC. Install PyTorch first with the command from
+# https://pytorch.org/get-started/locally/ (pick your CUDA version),
+# otherwise pip pulls in the CPU-only build.
+ultralytics

@@ -1,0 +1,10 @@
+[Unit]
+Description=Closet photos for training, every hour during the day
+
+[Timer]
+# starts after the 5:45 morning run so the two never fight over the camera
+OnCalendar=*-*-* 07..22:00:00
+RandomizedDelaySec=20min
+
+[Install]
+WantedBy=timers.target

@@ -1,6 +1,12 @@
 .env
 config.toml
 data/
+models/
+training/dataset/
+training/runs/
+training/classes.txt
+training/label_studio.xml
+*.pt
 __pycache__/
 *.pyc
 .venv/

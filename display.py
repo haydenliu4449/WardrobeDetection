@@ -4,7 +4,7 @@
     python3 display.py --windowed          for trying it out on a laptop
     python3 display.py --snapshot out.png  render one frame to a file and exit
 
-Arrow keys / space (or the GPIO button) flip between outfits.
+Arrow keys / space flip between outfits.
 """
 
 import argparse

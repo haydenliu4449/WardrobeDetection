@@ -6,10 +6,11 @@ A Raspberry Pi Zero 2 W takes a photo of the closet every morning, works out whi
 
 ```
 morning.py (systemd timer, 5:45 every day)
-  capture.py    webcam photo of the closet, LED strip on for a moment first
-  detect.py     closet photo + catalog contact sheet -> vision model -> which items are there
-  weather.py    today's forecast from Open-Meteo
-  outfits.py    score every valid combination, keep the best three
+  capture.py        webcam photo of the closet, LED strip on for a moment first
+  detect.py         closet photo + catalog contact sheet -> vision model API -> which items are there
+   or yolo_detect.py  closet photo -> YOLO model trained on this closet, runs on the Pi
+  weather.py        today's forecast from Open-Meteo
+  outfits.py        score every valid combination, keep the best three
   -> data/today.json
 
 display.py (always running)
@@ -20,7 +21,10 @@ A few decisions worth explaining:
 
 **Catalog first, then matching.** Recognizing clothes from scratch in a closet photo doesn't work well. Things overlap, a hanger might only show a sleeve, and folded stacks all look the same. So every item gets photographed once and added to `data/wardrobe.json`. In the morning the model gets the closet photo plus a contact sheet of the catalog (one image with every item labeled by id), and only has to answer "which of these are here?". Anything not found is assumed to be in the laundry.
 
-**The model runs in the cloud.** The Zero has 512MB of RAM, so running a vision model locally isn't realistic. `detect.py` calls the Anthropic API with `requests` instead of the SDK to keep dependencies down, and uses a forced tool call so the answer always comes back as structured JSON. IDs the model returns that aren't in the catalog get dropped.
+**Two ways to detect.** `[detect] method` in `config.toml` picks one. Both return the same list of item ids, so nothing else in the project cares which one ran.
+
+- `api` (the default): the Zero has 512MB of RAM, so a general vision model can't run locally. `detect.py` calls the Anthropic API with `requests` instead of the SDK to keep dependencies down, and uses a forced tool call so the answer always comes back as structured JSON. IDs the model returns that aren't in the catalog get dropped. It works from day one with no training data.
+- `yolo`: a small YOLO detector trained on photos of this closet, with one class per item. That's practical here because the camera never moves: same angle, same light, a few dozen known items. Training happens on a PC and the model is exported to ONNX, so the Pi only needs onnxruntime (no PyTorch), and inference takes a few seconds. No API cost, and the photo never leaves the Pi. Clothes the model wasn't trained on yet (new purchases) fall back to the API, or are assumed present if there's no key. See [training/README.md](training/README.md).
 
 **Outfits are picked with rules, not the model.** `outfits.py` builds every top+bottom (or dress) + shoes combination, adds a coat if it's cold or likely to rain, and scores each one on:
 - color (neutrals go with anything; tonal, analogous and complementary pairs score well; three bold colors doesn't)
@@ -49,13 +53,15 @@ Wi-Fi on the Zero is 2.4 GHz only, so check the signal where it'll be mounted.
 
 ## Setup on the Pi
 
-Flash Raspberry Pi OS Lite, enable SSH, then copy this folder over and run:
+Flash Raspberry Pi OS Lite (pick the 64-bit version if you plan to use YOLO), enable SSH, then copy this folder over and run setup:
 
 ```
-./setup.sh
+scp -r "Personal Project" pi@mirror.local:closet-mirror
+ssh pi@mirror.local
+cd closet-mirror && ./setup.sh          # or ./setup.sh --yolo
 ```
 
-It installs everything from apt (pip would have to compile OpenCV and pygame, which takes hours on the Zero), creates `config.toml` and `.env`, and installs the systemd units. After that:
+(Replace `pi@mirror.local` with your username and hostname.) It installs everything from apt (pip would have to compile OpenCV and pygame, which takes hours on the Zero), creates `config.toml` and `.env`, and installs the systemd units. `--yolo` also installs onnxruntime. After that:
 
 1. Put the API key in `.env`.
 2. Set latitude/longitude in `config.toml`.
@@ -98,7 +104,7 @@ python3 display.py --windowed     # arrow keys / space to flip outfits, q to qui
 python3 display.py --snapshot screen.png
 ```
 
-Other flags: `morning.py --photo some_photo.jpg` runs detection on an existing photo, and `--no-detect` skips the API.
+Other flags: `morning.py --photo some_photo.jpg` runs detection on an existing photo, and `--no-detect` skips detection entirely.
 
 ## Tests
 
@@ -106,15 +112,23 @@ Other flags: `morning.py --photo some_photo.jpg` runs detection on an existing p
 python3 -m unittest discover -s tests
 ```
 
-These cover outfit building (completeness, weather, rain, variety, repeats), color scoring, parsing the model's reply, and the fallbacks when detection fails.
+These cover:
+- outfit building (completeness, weather, rain, variety, repeats) and color scoring
+- parsing the API's reply, and the fallbacks when detection fails
+- YOLO output decoding, box coordinates, thresholds, and the API fallback for untrained items
+- the dataset split (whole days held out, bad labels dropped)
+- the duplicate-photo check in collection mode
 
 ## Files
 
 | file | what it does |
 |---|---|
 | `morning.py` | the daily run, ties everything together |
-| `capture.py` | webcam photo (OpenCV, falls back to fswebcam), closet light |
+| `capture.py` | webcam photo (OpenCV, falls back to fswebcam), closet light, training photo collection |
 | `detect.py` | contact sheet + API call + parsing |
+| `yolo_detect.py` | runs the trained ONNX model, API fallback for untrained items |
+| `training/prepare_dataset.py` | label list for the labeling tool, train/val split |
+| `training/train.py` | fine-tunes YOLO on a PC and exports to ONNX |
 | `weather.py` | Open-Meteo forecast |
 | `outfits.py` | builds and scores combinations |
 | `colors.py` | color names, neutrals, color matching |
@@ -125,7 +139,9 @@ These cover outfit building (completeness, weather, rain, variety, repeats), col
 
 ## Privacy
 
-Photos stay on the Pi. The only thing that leaves it is the morning closet photo, sent to the API for detection. Old captures are deleted after two weeks. The camera only points into the closet and only runs once a day.
+Photos stay on the Pi. With the API method, the only thing that leaves it is the morning closet photo, sent for detection. With YOLO, nothing leaves it unless an item needs the fallback. Old captures are deleted after two weeks. The camera only points into the closet and normally only runs once a day.
+
+Collection mode is the exception: it takes a photo every hour from 7am to 10pm while it's turned on. Make sure everyone who uses the closet knows when it's running. Turn it off once you have enough photos, and delete the photos you don't need after labeling.
 
 ## Ideas for later
 

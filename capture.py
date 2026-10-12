@@ -1,14 +1,17 @@
 """Takes a photo of the closet.
 
-Run it on its own to check the camera angle:
-    python3 capture.py            -> data/captures/test.jpg
+    python3 capture.py             check the camera angle -> data/captures/test.jpg
+    python3 capture.py --collect   save a photo for the YOLO training set -> data/training_photos/
 """
 
+import argparse
 import logging
 import shutil
 import subprocess
 import time
 from datetime import datetime
+
+from PIL import Image, ImageChops
 
 import config
 
@@ -95,6 +98,44 @@ def cleanup(keep=14):
         old.unlink()
 
 
+def changed_share(a, b, size=(160, 90), min_diff=30):
+    """Percent of the photo that's clearly different. Shrinking first averages out
+    sensor noise, and it's done in color because a red shirt and the grey wall
+    behind it can be the same brightness."""
+    def small(p):
+        return Image.open(p).convert("RGB").resize(size, Image.Resampling.BOX)
+    r, g, b = ImageChops.difference(small(a), small(b)).split()
+    biggest = ImageChops.lighter(ImageChops.lighter(r, g), b)
+    changed = sum(biggest.histogram()[min_diff + 1:])
+    return 100 * changed / (size[0] * size[1])
+
+
+def collect(cfg, folder=config.TRAINING_PHOTOS):
+    """Photo for the training set. Skipped if the closet hasn't changed since the
+    last one, labeling twenty copies of the same closet doesn't teach the model anything."""
+    earlier = sorted(folder.glob("*.jpg"))
+    path = take_photo(cfg, folder / f"{datetime.now():%Y-%m-%d_%H%M}.jpg")
+    if not earlier:
+        return path
+
+    changed = changed_share(path, earlier[-1])
+    # logged every time so the threshold can be tuned from the journal
+    log.info("%.1f%% changed since %s", changed, earlier[-1].name)
+    if changed < cfg["camera"]["collect_min_change"]:
+        path.unlink()
+        log.info("closet looks the same as last time, not keeping it")
+        return None
+    return path
+
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--collect", action="store_true", help="save a timestamped photo for training")
+    args = parser.parse_args()
+
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    take_photo(config.load(), config.CAPTURES_DIR / "test.jpg")
+    cfg = config.load()
+    if args.collect:
+        collect(cfg)
+    else:
+        take_photo(cfg, config.CAPTURES_DIR / "test.jpg")

@@ -2,10 +2,10 @@
 
 display.py watches today.json and redraws when it changes.
 
-    python3 morning.py                    normal run 
+    python3 morning.py                    normal run (the systemd timer does this)
     python3 morning.py --photo shot.jpg   use an existing photo instead of the camera
-    python3 morning.py --no-detect        assume everything is in the closet
-    python3 morning.py --demo             sample wardrobe
+    python3 morning.py --no-detect        skip detection and assume everything is in the closet
+    python3 morning.py --demo             sample wardrobe, no camera or API, for showing it on a laptop
 """
 
 import argparse
@@ -45,12 +45,19 @@ def write_json(path, data):
     tmp.replace(path)
 
 
+def run_detection(photo, items, cfg):
+    if cfg.get("detect", {}).get("method") == "yolo":
+        import yolo_detect  # needs onnxruntime, only installed when using it
+        return yolo_detect.detect(photo, items, cfg)
+    return detect.detect(photo, items, cfg)
+
+
 def check_closet(items, cfg, photo=None):
     """Returns (items that are in the closet, extra info for today.json)."""
     try:
         photo = Path(photo) if photo else capture.take_photo(cfg)
         capture.cleanup()
-        result = detect.detect(photo, items, cfg)
+        result = run_detection(photo, items, cfg)
     except Exception as e:
         log.error("couldn't check the closet: %s", e)
         result = None
@@ -73,7 +80,8 @@ def check_closet(items, cfg, photo=None):
             return items, {}
         return [i for i in items if i["id"] in ids], {"stale_inventory": last["date"]}
 
-    # unsure items count as present
+    # unsure items count as present: suggesting something that turns out to be
+    # in the wash is less annoying than never suggesting it
     ids = set(result["present"]) | set(result["unsure"])
     write_json(LAST_INVENTORY, {"date": date.today().isoformat(), "ids": sorted(ids)})
     info = {

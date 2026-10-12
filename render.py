@@ -1,8 +1,6 @@
 """Draws the mirror screen with Pillow.
 
-display.py only pushes the finished image to the screen. Doing the layout
-here means it can be tested anywhere (python3 display.py --snapshot) and the
-Zero only does the slow image resizing once per outfit, not every frame.
+display.py pushes the finished image to the screen
 """
 
 from datetime import date

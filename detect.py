@@ -2,8 +2,6 @@
 
 Instead of asking the model to identify clothes from scratch, it gets the
 closet photo plus a contact sheet of the catalog and just has to match them up.
-Uses the HTTP API directly with requests, the SDK pulls in more dependencies
-than the Pi Zero needs.
 
     python3 detect.py data/captures/test.jpg
 """
