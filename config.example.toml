@@ -1,0 +1,36 @@
+# Copy to config.toml and edit. Anything left out uses the defaults in config.py.
+
+[location]
+latitude = 37.77
+longitude = -122.42
+units = "fahrenheit"        # or "celsius"
+
+[camera]
+device = 0                  # /dev/video0
+width = 1920
+height = 1080
+warmup_frames = 20          # frames thrown away while exposure settles
+light_pin = 0               # GPIO (BCM) pin for the closet LED strip, 0 = no light
+light_settle = 1.5          # seconds to wait after turning the light on
+
+[detect]
+model = "claude-sonnet-5-5"
+max_image_px = 1568         # photos are shrunk to this before upload
+
+[outfits]
+count = 3
+repeat_days = 4             # avoid re-suggesting pieces from the last few days
+weekday_formality = 2       # 1 casual, 2 smart casual, 3 dressy
+weekend_formality = 1
+
+[display]
+# only used for --windowed and --snapshot, fullscreen uses the real screen size
+width = 1080
+height = 1920
+rotate = 0                  # 90 / 270 if the monitor is mounted on its side (PIL rotates counter-clockwise)
+panel_width = 0.8           # share of the screen used, the rest stays black (= plain mirror)
+align = "center"            # left / center / right
+show_from = "06:00"         # screen stays black outside these hours
+show_until = "11:00"
+cycle_seconds = 0           # auto-flip between outfits, 0 = only on button press
+button_pin = 0              # GPIO (BCM) pin for the "next outfit" button, 0 = none

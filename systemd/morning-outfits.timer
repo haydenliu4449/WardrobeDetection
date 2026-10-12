@@ -1,0 +1,10 @@
+[Unit]
+Description=Pick outfits every morning
+
+[Timer]
+OnCalendar=*-*-* 05:45:00
+# if the Pi was off at 5:45, run as soon as it boots
+Persistent=true
+
+[Install]
+WantedBy=timers.target

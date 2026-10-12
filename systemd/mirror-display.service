@@ -1,0 +1,17 @@
+[Unit]
+Description=Closet mirror display
+After=multi-user.target
+# keep the login console from drawing over the mirror
+Conflicts=getty@tty1.service
+
+[Service]
+User=__USER__
+WorkingDirectory=__DIR__
+Environment=SDL_VIDEODRIVER=kmsdrm
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 "__DIR__/display.py"
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

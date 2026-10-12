@@ -1,0 +1,20 @@
+[
+  {"id": "top-01", "name": "white linen shirt", "category": "top", "color": "white", "warmth": 2, "formality": 2, "patterned": false, "tags": []},
+  {"id": "top-02", "name": "black fitted tee", "category": "top", "color": "black", "warmth": 1, "formality": 1, "patterned": false, "tags": []},
+  {"id": "top-03", "name": "cream cable knit sweater", "category": "top", "color": "cream", "warmth": 4, "formality": 1, "patterned": false, "tags": []},
+  {"id": "top-04", "name": "sage silk blouse", "category": "top", "color": "sage", "warmth": 2, "formality": 3, "patterned": false, "tags": []},
+  {"id": "top-05", "name": "striped boat neck top", "category": "top", "color": "navy", "warmth": 2, "formality": 1, "patterned": true, "tags": []},
+  {"id": "top-06", "name": "rust ribbed turtleneck", "category": "top", "color": "rust", "warmth": 3, "formality": 2, "patterned": false, "tags": []},
+  {"id": "bottom-01", "name": "straight leg jeans", "category": "bottom", "color": "denim", "warmth": 3, "formality": 1, "patterned": false, "tags": []},
+  {"id": "bottom-02", "name": "black wide leg trousers", "category": "bottom", "color": "black", "warmth": 3, "formality": 3, "patterned": false, "tags": []},
+  {"id": "bottom-03", "name": "camel pleated skirt", "category": "bottom", "color": "camel", "warmth": 2, "formality": 2, "patterned": false, "tags": []},
+  {"id": "bottom-04", "name": "olive cargo pants", "category": "bottom", "color": "olive", "warmth": 3, "formality": 1, "patterned": false, "tags": []},
+  {"id": "dress-01", "name": "navy midi dress", "category": "dress", "color": "navy", "warmth": 2, "formality": 3, "patterned": false, "tags": []},
+  {"id": "dress-02", "name": "floral wrap dress", "category": "dress", "color": "pink", "warmth": 2, "formality": 2, "patterned": true, "tags": []},
+  {"id": "outer-01", "name": "camel wool coat", "category": "outerwear", "color": "camel", "warmth": 5, "formality": 3, "patterned": false, "tags": []},
+  {"id": "outer-02", "name": "denim jacket", "category": "outerwear", "color": "denim", "warmth": 3, "formality": 1, "patterned": false, "tags": []},
+  {"id": "outer-03", "name": "khaki trench coat", "category": "outerwear", "color": "khaki", "warmth": 3, "formality": 2, "patterned": false, "tags": ["waterproof"]},
+  {"id": "shoes-01", "name": "white sneakers", "category": "shoes", "color": "white", "warmth": 2, "formality": 1, "patterned": false, "tags": []},
+  {"id": "shoes-02", "name": "black ankle boots", "category": "shoes", "color": "black", "warmth": 3, "formality": 2, "patterned": false, "tags": []},
+  {"id": "shoes-03", "name": "tan suede loafers", "category": "shoes", "color": "tan", "warmth": 2, "formality": 2, "patterned": false, "tags": ["avoid_rain"]}
+]

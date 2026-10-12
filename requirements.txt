@@ -1,0 +1,7 @@
+# On the Pi, install these with apt instead (see setup.sh), pip builds of
+# opencv and pygame take hours on a Zero 2 W.
+# For running it on a laptop:
+pillow>=10.1
+requests
+pygame
+opencv-python-headless
